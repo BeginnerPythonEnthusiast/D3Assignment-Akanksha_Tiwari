@@ -1,6 +1,6 @@
 **# D3Assignment-Akanksha_Tiwari
 <li> Name of Student - Akanksha Tiwari
-<li> Student ID - 2506868@dundee.ac.uk
+<li> Student ID - 2506868
 
 
 Prerequisite to execute this UK Map.
