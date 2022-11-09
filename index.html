@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v5.js"></script>
+    <script src="//d3js.org/topojson.v1.min.js"></script>
+    <script>
+      function locationreload() {
+          location.reload();
+            
+      }
+     </script>
+    <div id="UK_Map"></div>
+    <title> UK Map Using D3.js</title>
+    <h1> UK Population Map</h1>
+    <p>The map shows population data of different towns of UK </p>
+    
+    
+      
+    <style>
+          h1 {text-align: center;}
+        p {text-align: center;}
+        
+.territory{
+    fill : 	 #3EB489;
+    stroke : #023020;
+    stroke-width:0.2px;
+}.selected{fill : #008000;}
+   
+.circle{
+    fill : rgb(240, 68, 68);
+    stroke : black;
+    stroke-width: 0.2px;
+    
+
+}
+
+    </style>
+</head>
+<body>
+<button type="submit" onclick="return confirm('Do you really want to refresh your page?') , locationreload();" class="btn btn-success">Refresh</button>
+<label for="slider" class="form-label h3"> Move slider to view data of more cities</label>
+<div class="new my-1 py-1"></div>
+<input id="town_slider" type="range" class="p-form-range" min="0" max="500" value="50">
+
+                   
+    <script>
+        var h = 550
+w = 700;
+
+var svg = d3.select("#UK_Map")
+  .append("svg")
+  .attr("width", w)
+  .attr("height", h)
+  
+
+map_data = "uk-file.json"
+counties_data = "http://34.78.46.186/Circles/Towns/500"
+
+  Promise.all([
+    d3.json(map_data),
+    d3.json(counties_data),
+  ]).then(([info, city]) => {
+    data(null,info,city);
+  });
+
+
+  var display = d3.geoMercator()
+  .center([2, 50])                
+  .scale(1750)                      
+  .translate([ w, h])
+  
+
+function data(error, info, city) {
+var territory = topojson.feature(info, info.objects.GBR_adm2).features;
+var visual = d3.geoPath().projection(display);
+  svg
+    .selectAll('.territory')
+    .data(territory)
+    .enter()
+    .append('path')
+    .attr('class', 'territory')
+    .attr('d', visual)
+    
+  var Infotip = d3.select('#UK_Map')
+    .append('div').data(city)
+    .style('background-color', 'yellow')
+    .style('border', 'solid')
+    .style('position', 'absolute')
+    .attr('class', 'infotip')
+    ;
+
+    var statusbar = function (d) {
+      Infotip.html(
+        'Town : ' +
+        d.Town +
+        '<br>' +
+        'Population: ' +
+        d.Population +
+        '<br>' +
+        'Longitude : ' +
+        d.lng +
+        '<br>' +
+        'Latitude : ' +
+        d.lat +
+        '<br>' +
+        'Region: ' +
+        d.County
+      )
+        
+    };
+ 
+  d3.select('#town_slider').on('input', function () {
+    const value = this.value;
+    const sizeOfcity = city.length;
+    const takenValues = Math.round((sizeOfcity / 100) * value);
+    const filteredcity = city.slice(0, takenValues);
+
+    addshapes(filteredcity);
+  });
+
+  addshapes(city);
+
+  function addshapes(map) {
+    svg.selectAll('.highlights').remove();
+
+    svg
+      .selectAll('.highlights')
+      .data(map)
+      .enter()
+      .append('circle')
+      .attr('cx', function (d) {
+        return display([d.lng, d.lat])[0];
+      })
+      .attr('cy', function (d) {
+        return display([d.lng, d.lat])[1];
+      })
+      .attr('r', 4)
+      .attr('class', 'circle highlights')
+      .on('mouseover', statusbar)
+  }
+
+}
+
+    </script>
+</body>  
+</html>
